@@ -478,6 +478,46 @@ a { color: inherit; text-decoration: none; }
 .auth-switch a:hover { text-decoration: underline; }
 
 /* ------------------------------------------------------------------ */
+/* Terms page                                                          */
+/* ------------------------------------------------------------------ */
+
+.terms-page {
+    padding: 5rem 2rem 4rem;
+}
+
+.terms-container {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.terms-header {
+    margin-bottom: 2.5rem;
+}
+
+.terms-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.terms-intro {
+    color: var(--ink-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.terms-section {
+    margin-bottom: 1.5rem;
+}
+
+.terms-section:last-child { margin-bottom: 0; }
+
+.terms-section .feature-title {
+    color: var(--accent);
+    font-size: 1.35rem;
+}
+
+.terms-section .feature-body { font-size: 1rem; }
+
+/* ------------------------------------------------------------------ */
 /* Footer                                                              */
 /* ------------------------------------------------------------------ */
 
@@ -527,4 +567,6 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 600px) {
     .nav-links a:not(.nav-cta) { display: none; }
     .hero { padding: 3rem 1rem 2rem; }
+    .terms-page { padding: 3rem 1rem 2rem; }
+    .terms-section { padding: 1.5rem; }
 }
