@@ -1,0 +1,223 @@
+.hero.spendly-hero {
+    display: block;
+    max-width: none;
+    margin: 0;
+    padding: 81px 32px 80px;
+    background: #ffffff;
+    color: #111111;
+    text-align: center;
+    font-family: var(--font-body);
+}
+
+.spendly-hero .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 46px;
+    padding: 5px 23px;
+    border: 1px solid #a2dfca;
+    border-radius: 999px;
+    background: #e5f4ee;
+    color: #2d715b;
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 31px;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.spendly-hero .hero-badge::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #489f7b;
+}
+
+.spendly-hero .hero-title {
+    margin-bottom: 32px;
+    font-family: var(--font-body);
+    font-size: clamp(40px, 6.05vw, 72px);
+    font-weight: 600;
+    line-height: 1.17;
+    letter-spacing: -1.8px;
+}
+
+.spendly-hero .hero-title span { color: #489f7b; }
+
+.spendly-hero .hero-subtitle {
+    max-width: 840px;
+    margin: 0 auto 56px;
+    color: #666666;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+.spendly-hero .hero-actions {
+    justify-content: center;
+    gap: 20px;
+}
+
+.spendly-hero .hero-actions .btn-primary {
+    padding: 15px 40px;
+    border-radius: 18px;
+    background: #111111;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 36px;
+}
+
+.spendly-hero .hero-actions .btn-primary:hover { background: #2d715b; }
+
+.spendly-hero .hero-actions .btn-primary:focus-visible {
+    outline: 3px solid #489f7b;
+    outline-offset: 4px;
+}
+
+.spendly-hero .hero-dashboard {
+    max-width: 1000px;
+    margin: 73px auto 0;
+    padding: 27px;
+    border: 1px solid #dfddd7;
+    border-radius: 23px;
+    background: #f7f7f5;
+    text-align: left;
+    scroll-margin-top: 80px;
+}
+
+.spendly-hero .hero-window-dots {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.spendly-hero .hero-window-dots span {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #e79597;
+}
+
+.spendly-hero .hero-window-dots span:nth-child(2) { background: #f6c97c; }
+.spendly-hero .hero-window-dots span:nth-child(3) { background: #a9e0ce; }
+
+.spendly-hero .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 17px;
+    margin-bottom: 17px;
+}
+
+.spendly-hero .hero-stat {
+    padding: 20px 26px;
+    border: 1px solid #dfddd7;
+    border-radius: 18px;
+    background: #ffffff;
+}
+
+.spendly-hero .hero-stat-label {
+    color: #999999;
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 30px;
+    margin-bottom: 5px;
+}
+
+.spendly-hero .hero-stat-value {
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 44px;
+    letter-spacing: -0.8px;
+}
+
+.spendly-hero .hero-stat-note {
+    color: #aaaaaa;
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 30px;
+}
+
+.spendly-hero .hero-stat-increase { color: #ee4845; }
+.spendly-hero .hero-stat-remaining { color: #489f7b; }
+
+.spendly-hero .hero-spending {
+    display: grid;
+    gap: 10px;
+    padding: 20px 26px;
+    border: 1px solid #dfddd7;
+    border-radius: 18px;
+    background: #ffffff;
+}
+
+.spendly-hero .hero-spending-row {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    align-items: center;
+    gap: 20px;
+    color: #666666;
+    font-size: 21px;
+    font-weight: 500;
+    line-height: 31px;
+    text-align: center;
+}
+
+.spendly-hero .hero-spending-track {
+    height: 14px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #f0efea;
+}
+
+.spendly-hero .hero-spending-fill {
+    height: 100%;
+    border-radius: inherit;
+}
+
+.spendly-hero .hero-spending-food { width: 72%; background: #e9a23f; }
+.spendly-hero .hero-spending-travel { width: 48%; background: #4d89dc; }
+.spendly-hero .hero-spending-bills { width: 38%; background: #8075e3; }
+
+@media (max-width: 900px) {
+    .spendly-hero .hero-subtitle { font-size: 23px; }
+    .spendly-hero .hero-desktop-break { display: none; }
+    .spendly-hero .hero-stat { padding: 18px; }
+}
+
+@media (max-width: 600px) {
+    .hero.spendly-hero { padding: 48px 16px; }
+    .spendly-hero .hero-badge {
+        padding: 5px 12px;
+        gap: 8px;
+        margin-bottom: 30px;
+        font-size: 14px;
+        line-height: 24px;
+    }
+    .spendly-hero .hero-title {
+        font-size: clamp(30px, 7.5vw, 45px);
+        letter-spacing: -1px;
+    }
+    .spendly-hero .hero-subtitle {
+        font-size: 18px;
+        margin-bottom: 32px;
+    }
+    .spendly-hero .hero-actions { flex-direction: column; gap: 12px; }
+    .spendly-hero .hero-actions .btn-primary {
+        width: 100%;
+        max-width: 320px;
+        padding: 12px 20px;
+        font-size: 18px;
+        line-height: 28px;
+    }
+    .spendly-hero .hero-dashboard { margin-top: 44px; padding: 16px; }
+    .spendly-hero .hero-stats { grid-template-columns: 1fr; gap: 12px; }
+    .spendly-hero .hero-stat-value { font-size: 30px; }
+    .spendly-hero .hero-spending { padding: 16px 12px; }
+    .spendly-hero .hero-spending-row {
+        grid-template-columns: 48px 1fr;
+        gap: 12px;
+        font-size: 16px;
+    }
+}

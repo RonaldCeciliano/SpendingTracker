@@ -2,60 +2,63 @@
 
 {% block title %}Spendly — Track Every Rupee{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
 {% block content %}
 
-<section class="hero">
+<section class="hero spendly-hero">
     <div class="hero-inner">
-        <div class="hero-badge">Personal Finance Tracker</div>
+        <div class="hero-badge">Free to use · No credit card needed</div>
         <h1 class="hero-title">
-            Know where your<br>
-            <em>money goes</em>
+            Track every rupee.<br>
+            <span>Know where it goes.</span>
         </h1>
         <p class="hero-subtitle">
-            Log expenses, understand your spending patterns,
-            and take control of your financial life —
-            one transaction at a time.
+            Spendly helps you log expenses, spot patterns, and stay<br class="hero-desktop-break">
+            on budget — without the spreadsheet headache.
         </p>
         <div class="hero-actions">
-            <a href="{{ url_for('register') }}" class="btn-primary">Start tracking free</a>
-            <a href="{{ url_for('login') }}" class="btn-ghost">Sign in</a>
+            <a href="{{ url_for('register') }}" class="btn-primary">Create free account</a>
+            <a href="#hero-preview" class="btn-primary">See how it works</a>
         </div>
     </div>
-    <div class="hero-visual">
-        <div class="mock-card">
-            <div class="mock-card-header">
-                <span class="mock-label">March 2026</span>
-                <span class="mock-total">₹12,450</span>
+    <div class="hero-dashboard" id="hero-preview" role="img" aria-label="Example expense dashboard: this month ₹18,240, up 12% versus last month; budget left ₹6,760, 43% remaining; 34 transactions this month. Sample spending bars for Food, Travel, and Bills.">
+        <div class="hero-window-dots" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="hero-stats" aria-hidden="true">
+            <div class="hero-stat">
+                <p class="hero-stat-label">This month</p>
+                <p class="hero-stat-value">₹18,240</p>
+                <p class="hero-stat-note hero-stat-increase">+12% vs last</p>
             </div>
-            <div class="mock-bars">
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Bills</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar" style="width: 72%"></div>
-                    </div>
-                    <span class="mock-amt">₹4,500</span>
-                </div>
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Food</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar mock-bar-2" style="width: 52%"></div>
-                    </div>
-                    <span class="mock-amt">₹3,200</span>
-                </div>
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Health</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar mock-bar-3" style="width: 33%"></div>
-                    </div>
-                    <span class="mock-amt">₹2,050</span>
-                </div>
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Transport</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar mock-bar-4" style="width: 28%"></div>
-                    </div>
-                    <span class="mock-amt">₹1,800</span>
-                </div>
+            <div class="hero-stat">
+                <p class="hero-stat-label">Budget left</p>
+                <p class="hero-stat-value">₹6,760</p>
+                <p class="hero-stat-note hero-stat-remaining">43% remaining</p>
+            </div>
+            <div class="hero-stat">
+                <p class="hero-stat-label">Transactions</p>
+                <p class="hero-stat-value">34</p>
+                <p class="hero-stat-note">this month</p>
+            </div>
+        </div>
+        <div class="hero-spending" aria-hidden="true">
+            <div class="hero-spending-row">
+                <span>Food</span>
+                <div class="hero-spending-track"><div class="hero-spending-fill hero-spending-food"></div></div>
+            </div>
+            <div class="hero-spending-row">
+                <span>Travel</span>
+                <div class="hero-spending-track"><div class="hero-spending-fill hero-spending-travel"></div></div>
+            </div>
+            <div class="hero-spending-row">
+                <span>Bills</span>
+                <div class="hero-spending-track"><div class="hero-spending-fill hero-spending-bills"></div></div>
             </div>
         </div>
     </div>
