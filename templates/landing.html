@@ -21,7 +21,7 @@
         </p>
         <div class="hero-actions">
             <a href="{{ url_for('register') }}" class="btn-primary">Create free account</a>
-            <a href="#hero-preview" class="btn-primary">See how it works</a>
+            <button type="button" class="btn-primary" id="open-demo" aria-haspopup="dialog" aria-controls="demo-modal">See how it works</button>
         </div>
     </div>
     <div class="hero-dashboard" id="hero-preview" role="img" aria-label="Example expense dashboard: this month ₹18,240, up 12% versus last month; budget left ₹6,760, 43% remaining; 34 transactions this month. Sample spending bars for Food, Travel, and Bills.">
@@ -63,6 +63,21 @@
         </div>
     </div>
 </section>
+
+<dialog class="demo-modal" id="demo-modal" aria-labelledby="demo-title">
+    <div class="demo-modal-header">
+        <h2 id="demo-title">See how Spendly works</h2>
+        <button type="button" class="demo-modal-close" aria-label="Close video" autofocus>&times;</button>
+    </div>
+    <div class="demo-modal-video"></div>
+    <template id="demo-video-template">
+        <!-- Replace this placeholder with your YouTube /embed/VIDEO_ID URL. -->
+        <iframe src="https://www.youtube.com/embed/aqz-KE-bpKQ"
+            title="Spendly demo video (placeholder)"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </template>
+</dialog>
 
 <section class="features">
     <div class="features-inner">
