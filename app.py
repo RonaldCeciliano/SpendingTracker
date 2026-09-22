@@ -1,6 +1,9 @@
 from flask import Flask, render_template
 
+from database.db import init_app
+
 app = Flask(__name__)
+init_app(app)
 
 
 # ------------------------------------------------------------------ #
