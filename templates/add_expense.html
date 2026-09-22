@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Add Expense — Spendly{% endblock %}
+
+{% macro field_error(field) %}
+    {% if errors.get(field) %}
+    <p class="expense-field-error" id="{{ field }}-error">{{ errors[field] }}</p>
+    {% endif %}
+{% endmacro %}
+
+{% macro error_attributes(field) %}
+    {% if errors.get(field) %}aria-invalid="true" aria-describedby="{{ field }}-error"{% endif %}
+{% endmacro %}
+
+{% block content %}
+<section class="auth-section expense-page">
+    <div class="auth-container expense-container">
+        <header class="auth-header">
+            <h1 class="auth-title">Add Expense</h1>
+            <p class="auth-subtitle">Keep track of what you spend on your nail business.</p>
+        </header>
+
+        {% for message in get_flashed_messages(category_filter=['success']) %}
+        <div class="expense-success" role="status">{{ message }}</div>
+        {% endfor %}
+
+        <div class="auth-card">
+            {% if errors %}
+            <div class="auth-error" role="alert">{{ errors.get('form', 'Please correct the highlighted fields below.') }}</div>
+            {% endif %}
+            <p class="expense-form-help">Date, vendor, amount, and category are required.</p>
+            <form method="post" action="{{ url_for('add_expense') }}" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ session['expense_csrf_token'] }}">
+                <div class="form-group">
+                    <label for="date">Date (MM-DD-YYYY)</label>
+                    <input class="form-input" type="text" name="date" id="date" value="{{ values.date }}"
+                        placeholder="09-22-2026" required {{ error_attributes('date') }}>
+                    {{ field_error('date') }}
+                </div>
+                <div class="form-group">
+                    <label for="vendor">Vendor</label>
+                    <input class="form-input" type="text" name="vendor" id="vendor" value="{{ values.vendor }}"
+                        maxlength="{{ text_limits.vendor }}" required {{ error_attributes('vendor') }}>
+                    {{ field_error('vendor') }}
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount ($)</label>
+                    <input class="form-input" type="text" inputmode="decimal" name="amount" id="amount"
+                        value="{{ values.amount }}" placeholder="12.34" required {{ error_attributes('amount') }}>
+                    {{ field_error('amount') }}
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select class="form-input" name="category" id="category" required {{ error_attributes('category') }}>
+                        <option value="">Choose a category</option>
+                        {% if values.category and values.category not in categories %}
+                        <option value="{{ values.category }}" selected>{{ values.category }} (unsupported)</option>
+                        {% endif %}
+                        {% for category in categories %}
+                        <option value="{{ category }}" {% if values.category == category %}selected{% endif %}>{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                    {{ field_error('category') }}
+                </div>
+                <div class="form-group">
+                    <label for="payment_method">Payment method (optional)</label>
+                    <input class="form-input" type="text" name="payment_method" id="payment_method"
+                        value="{{ values.payment_method }}" placeholder="Cash, debit card, credit card…"
+                        maxlength="{{ text_limits.payment_method }}" {{ error_attributes('payment_method') }}>
+                    {{ field_error('payment_method') }}
+                </div>
+                <div class="form-group">
+                    <label for="description">Description (optional)</label>
+                    <textarea class="form-input" name="description" id="description" rows="3"
+                        maxlength="{{ text_limits.description }}" {{ error_attributes('description') }}>{{ values.description }}</textarea>
+                    {{ field_error('description') }}
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes (optional)</label>
+                    <textarea class="form-input" name="notes" id="notes" rows="4"
+                        maxlength="{{ text_limits.notes }}" {{ error_attributes('notes') }}>{{ values.notes }}</textarea>
+                    {{ field_error('notes') }}
+                </div>
+                <button class="btn-submit" type="submit">Save expense</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

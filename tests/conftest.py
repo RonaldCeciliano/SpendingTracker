@@ -1,17 +1,16 @@
 import pytest
-from flask import Flask
-
-from database.db import get_db, init_app, init_db
+from app import app as flask_app
+from database.db import get_db, init_db
 
 
 @pytest.fixture
-def app(tmp_path):
-    app = Flask(__name__)
-    app.config.update(TESTING=True, DATABASE=str(tmp_path / "expenses.db"))
-    init_app(app)
-    with app.app_context():
+def app(tmp_path, monkeypatch):
+    monkeypatch.setitem(flask_app.config, "TESTING", True)
+    monkeypatch.setitem(flask_app.config, "DATABASE", str(tmp_path / "expenses.db"))
+    monkeypatch.setitem(flask_app.config, "SECRET_KEY", "test-secret")
+    with flask_app.app_context():
         init_db()
-    return app
+    return flask_app
 
 
 @pytest.fixture

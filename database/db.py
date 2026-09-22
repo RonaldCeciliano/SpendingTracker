@@ -21,6 +21,20 @@ def get_db():
     return g.db
 
 
+def create_expense(*, date, vendor, amount, category, payment_method=None,
+                   description=None, notes=None):
+    """Save validated expense data, with amount already expressed in cents."""
+    db = get_db()
+    with db:
+        cursor = db.execute(
+            """INSERT INTO expenses
+               (date, vendor, amount, category, payment_method, description, notes)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (date, vendor, amount, category, payment_method, description, notes),
+        )
+    return cursor.lastrowid
+
+
 def close_db(exception=None):
     """Close the context's connection, including after request failures."""
     db = g.pop("db", None)
