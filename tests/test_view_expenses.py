@@ -103,7 +103,7 @@ def test_added_expense_appears_in_history(client):
     with client.session_transaction() as session:
         token = session["expense_csrf_token"]
     response = client.post("/expenses/add", data={
-        "csrf_token": token, "date": "02-29-2024", "vendor": "New supplies",
+        "csrf_token": token, "date": "2024-02-29", "vendor": "New supplies",
         "amount": "1250.00", "category": "Tools & Equipment",
     })
     assert response.status_code == 303

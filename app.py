@@ -34,6 +34,13 @@ EXPENSE_TEXT_LIMITS = {
 EXPENSE_FIELDS = ("date", "vendor", "amount", "category", "payment_method", "description", "notes")
 
 
+def parse_expense_date(value):
+    """Validate the ISO calendar date submitted by a native date input."""
+    if not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", value):
+        raise ValueError
+    return date.fromisoformat(value).isoformat()
+
+
 def validate_expense(values):
     """Return field errors and normalized data; amount is converted to cents."""
     data = {field: value.strip() for field, value in values.items()}
@@ -44,12 +51,9 @@ def validate_expense(values):
 
     if data["date"]:
         try:
-            if not re.fullmatch(r"[0-9]{2}-[0-9]{2}-[0-9]{4}", data["date"]):
-                raise ValueError
-            month, day, year = map(int, data["date"].split("-"))
-            data["date"] = date(year, month, day).isoformat()
+            data["date"] = parse_expense_date(data["date"])
         except ValueError:
-            errors["date"] = "Enter a valid date in MM-DD-YYYY format."
+            errors["date"] = "Select a valid date."
 
     if data["amount"]:
         # Bound input before Decimal conversion and reject rounding/exponents.
@@ -128,7 +132,25 @@ def format_expense_amount(cents):
 @app.route("/expenses")
 def expenses():
     session.setdefault("expense_csrf_token", secrets.token_hex(32))
-    return render_template("expenses.html", expenses=get_expenses())
+    filters = {field: request.args.get(field, "")
+               for field in ("search", "category", "start_date", "end_date")}
+    data = {field: value.strip() for field, value in filters.items()}
+    errors = {}
+    if data["category"] and data["category"] not in EXPENSE_CATEGORIES:
+        errors["category"] = "Choose one of the supported business categories."
+    for field in ("start_date", "end_date"):
+        if data[field]:
+            try:
+                data[field] = parse_expense_date(data[field])
+            except ValueError:
+                errors[field] = "Select a valid date."
+    if not errors and data["start_date"] and data["end_date"] and data["start_date"] > data["end_date"]:
+        errors["end_date"] = "End Date must be on or after Start Date."
+    return render_template(
+        "expenses.html", expenses=[] if errors else get_expenses(**data),
+        filters=filters, filter_errors=errors, active_filters=any(data.values()),
+        categories=EXPENSE_CATEGORIES,
+    ), 400 if errors else 200
 
 
 @app.route("/expenses/add", methods=["GET", "POST"])
@@ -148,7 +170,6 @@ def expense_form(expense=None):
     values = {field: "" for field in EXPENSE_FIELDS}
     if expense is not None:
         values = {field: expense[field] or "" for field in EXPENSE_FIELDS}
-        values["date"] = format_expense_date(expense["date"])
         dollars, cents = divmod(expense["amount"], 100)
         values["amount"] = f"{dollars}.{cents:02d}"
     errors = {}
@@ -203,6 +224,7 @@ def delete_expense(id):
         app.logger.exception("Could not delete expense")
         return render_template(
             "expenses.html", expenses=get_expenses(),
+            categories=EXPENSE_CATEGORIES,
             error="Your expense could not be deleted. Please try again shortly.",
         ), 503
     flash("Expense deleted successfully.", "success")

@@ -39,7 +39,7 @@ def expense_form(client):
     token = FormParser(page.get_data(as_text=True)).values["csrf_token"]
     return {
         "csrf_token": token,
-        "date": "09-22-2026",
+        "date": "2026-09-22",
         "vendor": "Nail Supply Shop",
         "amount": "12.34",
         "category": "Nail Supplies",
@@ -60,8 +60,9 @@ def test_page_and_navigation(client, app):
     assert response.status_code == 200
     html = response.get_data(as_text=True)
     assert "Add Expense — Spendly" in html
-    assert "Date (MM-DD-YYYY)" in html
-    assert 'placeholder="09-22-2026"' in html
+    assert '<label for="date">Date</label>' in html
+    assert 'type="date" name="date"' in html
+    assert "MM-DD-YYYY" not in html
     assert 'name="receipt_path"' not in html
     assert expense_rows(app) == []
 
@@ -116,10 +117,11 @@ def test_required_fields(client, app, expense_form, field, value):
 
 
 @pytest.mark.parametrize("field,value", [
-    ("date", "02-29-2026"), ("date", "04-31-2026"), ("date", "20260922"),
+    ("date", "2026-02-29"), ("date", "2026-04-31"), ("date", "20260922"),
+    ("date", "2026-9-22"), ("date", "10000-01-01"), ("date", "2026-09-22T12:00:00"),
     ("date", "09/22/2026"), ("date", "9-2-2026"), ("date", "bad date"),
-    ("date", "2026-09-22"), ("date", "13-01-2026"), ("date", "09-00-2026"),
-    ("date", "09-22-0000"), ("date", " 02-29-2026 "),
+    ("date", "09-22-2026"), ("date", "2026-13-01"), ("date", "2026-09-00"),
+    ("date", "0000-09-22"), ("date", " 2026-02-29 "),
     ("category", "Personal"), ("category", "nail supplies"),
     ("amount", "0"), ("amount", "0.00"), ("amount", "-1"),
     ("amount", "12.345"), ("amount", "NaN"), ("amount", "Infinity"),
@@ -134,7 +136,7 @@ def test_invalid_values_preserved_without_saving(client, app, expense_form, fiel
     html = response.get_data(as_text=True)
     assert f'id="{field}-error"' in html
     if field == "date":
-        assert "Enter a valid date in MM-DD-YYYY format." in html
+        assert "Select a valid date." in html
     values = FormParser(html).values
     for name, original in expense_form.items():
         assert values[name] == original
@@ -161,7 +163,7 @@ def test_optional_fields_and_receipt_not_accepted(client, app, expense_form):
 
 
 def test_trims_text_and_accepts_leap_day(client, app, expense_form):
-    expense_form.update(date="02-29-2024", vendor="  Nail Shop  ", notes=" \n ")
+    expense_form.update(date="2024-02-29", vendor="  Nail Shop  ", notes=" \n ")
     assert client.post("/expenses/add", data=expense_form).status_code == 303
     row = expense_rows(app)[0]
     assert row["date"] == "2024-02-29"
@@ -170,10 +172,10 @@ def test_trims_text_and_accepts_leap_day(client, app, expense_form):
 
 
 def test_valid_date_preserved_exactly_when_another_field_is_invalid(client, app, expense_form):
-    expense_form.update(date=" 09-22-2026 ", amount="0")
+    expense_form.update(date="2026-09-22", amount="0")
     response = client.post("/expenses/add", data=expense_form)
     assert response.status_code == 400
-    assert FormParser(response.get_data(as_text=True)).values["date"] == " 09-22-2026 "
+    assert FormParser(response.get_data(as_text=True)).values["date"] == "2026-09-22"
     assert expense_rows(app) == []
 
 

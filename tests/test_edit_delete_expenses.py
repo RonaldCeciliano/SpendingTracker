@@ -23,13 +23,14 @@ def edit_form(client, existing):
 
 def test_edit_prepopulates_all_fields(client, app, existing, edit_form):
     assert {k: v for k, v in edit_form.items() if k != "csrf_token"} == {
-        "date": "09-22-2026", "vendor": "Nail Supply Shop", "amount": "74.38",
+        "date": "2026-09-22", "vendor": "Nail Supply Shop", "amount": "74.38",
         "category": "Nail Supplies", "payment_method": "Debit card",
         "description": "Gel polish", "notes": "Client appointments",
     }
     assert len(expense_rows(app)) == 1
     html = client.get(f"/expenses/{existing}/edit").get_data(as_text=True)
     assert "Edit Expense — Spendly" in html
+    assert 'type="date" name="date"' in html
     assert 'href="/expenses"' in html
 
 
@@ -48,7 +49,7 @@ def test_edit_exact_money_and_empty_optional_fields(client, app, amount, display
 def test_edit_updates_only_selected_record_and_reorders_history(client, app, existing, edit_form):
     other = save_expense(app, vendor="Unaffected")
     before_other = dict(expense_rows(app)[1])
-    edit_form.update(date="02-29-2024", vendor=" Updated vendor ", amount="0.29",
+    edit_form.update(date="2024-02-29", vendor=" Updated vendor ", amount="0.29",
                      category="Other", payment_method="Cash", description="Files", notes="Updated")
     response = client.post(f"/expenses/{existing}/edit", data=edit_form)
     assert response.status_code == 303
@@ -75,7 +76,8 @@ def test_edit_categories(client, app, existing, edit_form, category):
 
 @pytest.mark.parametrize("field,value", [
     ("date", ""), ("vendor", "  "), ("amount", ""), ("category", ""),
-    ("date", "2026-09-22"), ("date", "02-29-2026"), ("date", "9-2-2026"),
+    ("date", "09-22-2026"), ("date", "2026-02-29"), ("date", "9-2-2026"),
+    ("date", "2026-9-22"), ("date", "10000-01-01"),
     ("amount", "0"), ("amount", "-1"), ("amount", "1.234"), ("amount", "NaN"),
     ("amount", "1e2"), ("amount", "92233720368547758.08"), ("category", "Personal"),
     *[(field, "a" * (limit + 1)) for field, limit in EXPENSE_TEXT_LIMITS.items()],

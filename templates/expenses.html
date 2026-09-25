@@ -19,7 +19,50 @@
     <div class="auth-error" role="alert">{{ error }}</div>
     {% endif %}
 
-    {% if expenses %}
+    {% set filters = filters | default({}) %}
+    {% set filter_errors = filter_errors | default({}) %}
+    <form method="get" action="{{ url_for('expenses') }}" class="expense-filters" aria-label="Filter expenses">
+        <div class="form-group">
+            <label for="expense-search">Search vendor or description</label>
+            <input class="form-input" id="expense-search" type="search" name="search"
+                value="{{ filters.get('search', '') }}" placeholder="Vendor or description">
+        </div>
+        <div class="form-group">
+            <label for="filter-category">Category</label>
+            <select class="form-input" id="filter-category" name="category"
+                {% if filter_errors.category %}aria-invalid="true" aria-describedby="filter-category-error"{% endif %}>
+                <option value="" {% if not filters.get('category') %}selected{% endif %}>All Categories</option>
+                {% if filters.get('category') and filters.category not in categories %}
+                <option value="{{ filters.category }}" selected>{{ filters.category }}</option>
+                {% endif %}
+                {% for category in categories %}
+                <option value="{{ category }}" {% if filters.get('category') == category %}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+            </select>
+            {% if filter_errors.category %}
+            <p class="expense-field-error" id="filter-category-error">{{ filter_errors.category }}</p>
+            {% endif %}
+        </div>
+        {% for field, label in [('start_date', 'Start Date'), ('end_date', 'End Date')] %}
+        <div class="form-group">
+            <label for="filter-{{ field }}">{{ label }}</label>
+            <input class="form-input" id="filter-{{ field }}" type="date" name="{{ field }}"
+                value="{{ filters.get(field, '') }}" max="9999-12-31"
+                {% if filter_errors.get(field) %}aria-invalid="true" aria-describedby="filter-{{ field }}-error"{% endif %}>
+            {% if filter_errors.get(field) %}
+            <p class="expense-field-error" id="filter-{{ field }}-error">{{ filter_errors[field] }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="expense-filter-actions">
+            <button class="btn-primary" type="submit">Apply Filters</button>
+            <a class="btn-ghost" href="{{ url_for('expenses') }}">Clear Filters</a>
+        </div>
+    </form>
+
+    {% if filter_errors %}
+    <div class="auth-error" role="alert">Correct the filters above and apply them again.</div>
+    {% elif expenses %}
     <ul class="expense-history-list" aria-label="Expense history">
         {% for expense in expenses %}
         <li class="expense-history-card">
@@ -72,6 +115,12 @@
             <button class="btn-delete expense-delete-confirm" type="button">Delete Expense</button>
         </div>
     </dialog>
+    {% elif active_filters %}
+    <div class="expense-history-empty" role="status">
+        <h2>No expenses match your filters</h2>
+        <p>Try a different search, category, or date range.</p>
+        <a class="btn-ghost" href="{{ url_for('expenses') }}">Clear Filters</a>
+    </div>
     {% else %}
     <div class="expense-history-empty">
         <h2>No expenses yet</h2>

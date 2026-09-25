@@ -17,6 +17,7 @@ def get_db():
     if "db" not in g:
         g.db = sqlite3.connect(current_app.config["DATABASE"])
         g.db.row_factory = sqlite3.Row
+        g.db.create_function("casefold", 1, lambda value: (value or "").casefold(), deterministic=True)
         g.db.execute("PRAGMA foreign_keys = ON")
     return g.db
 
@@ -35,11 +36,26 @@ def create_expense(*, date, vendor, amount, category, payment_method=None,
     return cursor.lastrowid
 
 
-def get_expenses():
-    """Return expense history, newest date first and newest ID for date ties."""
+def get_expenses(*, search="", category="", start_date="", end_date=""):
+    """Filter history with validated ISO date bounds; preserve date/ID ordering."""
+    conditions = []
+    parameters = []
+    if search:
+        conditions.append("(instr(casefold(vendor), ?) > 0 OR instr(casefold(description), ?) > 0)")
+        parameters.extend([search.casefold(), search.casefold()])
+    if category:
+        conditions.append("category = ?")
+        parameters.append(category)
+    if start_date:
+        conditions.append("date >= ?")
+        parameters.append(start_date)
+    if end_date:
+        conditions.append("date <= ?")
+        parameters.append(end_date)
+    where = " WHERE " + " AND ".join(conditions) if conditions else ""
     return get_db().execute(
         """SELECT id, date, vendor, amount, category, payment_method, description
-           FROM expenses ORDER BY date DESC, id DESC"""
+           FROM expenses""" + where + " ORDER BY date DESC, id DESC", parameters,
     ).fetchall()
 
 
