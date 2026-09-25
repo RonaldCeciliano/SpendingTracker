@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Add Expense — Spendly{% endblock %}
+{% block title %}{{ 'Edit Expense' if expense else 'Add Expense' }} — Spendly{% endblock %}
 
 {% macro field_error(field) %}
     {% if errors.get(field) %}
@@ -16,7 +16,7 @@
 <section class="auth-section expense-page">
     <div class="auth-container expense-container">
         <header class="auth-header">
-            <h1 class="auth-title">Add Expense</h1>
+            <h1 class="auth-title">{{ 'Edit Expense' if expense else 'Add Expense' }}</h1>
             <p class="auth-subtitle">Keep track of what you spend on your nail business.</p>
         </header>
 
@@ -29,7 +29,7 @@
             <div class="auth-error" role="alert">{{ errors.get('form', 'Please correct the highlighted fields below.') }}</div>
             {% endif %}
             <p class="expense-form-help">Date, vendor, amount, and category are required.</p>
-            <form method="post" action="{{ url_for('add_expense') }}" novalidate>
+            <form method="post" action="{{ url_for('edit_expense', id=expense.id) if expense else url_for('add_expense') }}" novalidate>
                 <input type="hidden" name="csrf_token" value="{{ session['expense_csrf_token'] }}">
                 <div class="form-group">
                     <label for="date">Date (MM-DD-YYYY)</label>
@@ -81,7 +81,10 @@
                         maxlength="{{ text_limits.notes }}" {{ error_attributes('notes') }}>{{ values.notes }}</textarea>
                     {{ field_error('notes') }}
                 </div>
-                <button class="btn-submit" type="submit">Save expense</button>
+                <button class="btn-submit" type="submit">{{ 'Save changes' if expense else 'Save expense' }}</button>
+                {% if expense %}
+                <a class="btn-ghost expense-cancel" href="{{ url_for('expenses') }}">Cancel</a>
+                {% endif %}
             </form>
         </div>
     </div>

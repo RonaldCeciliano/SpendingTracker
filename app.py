@@ -5,9 +5,12 @@ import sqlite3
 from datetime import date
 from decimal import Decimal
 
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
 
-from database.db import create_expense, get_expenses, init_app
+from database.db import (
+    create_expense, delete_expense as delete_expense_record, get_expense,
+    get_expenses, init_app, update_expense,
+)
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
@@ -124,37 +127,86 @@ def format_expense_amount(cents):
 
 @app.route("/expenses")
 def expenses():
+    session.setdefault("expense_csrf_token", secrets.token_hex(32))
     return render_template("expenses.html", expenses=get_expenses())
 
 
 @app.route("/expenses/add", methods=["GET", "POST"])
 def add_expense():
+    return expense_form()
+
+
+def valid_expense_csrf():
+    token = request.form.get("csrf_token", "")
+    expected = session.get("expense_csrf_token", "")
+    return bool(expected) and secrets.compare_digest(token.encode(), expected.encode())
+
+
+def expense_form(expense=None):
+    """Share validation, error handling, and rendering for adding and editing."""
     session.setdefault("expense_csrf_token", secrets.token_hex(32))
     values = {field: "" for field in EXPENSE_FIELDS}
+    if expense is not None:
+        values = {field: expense[field] or "" for field in EXPENSE_FIELDS}
+        values["date"] = format_expense_date(expense["date"])
+        dollars, cents = divmod(expense["amount"], 100)
+        values["amount"] = f"{dollars}.{cents:02d}"
     errors = {}
     status = 200
     if request.method == "POST":
         values = {field: request.form.get(field, "") for field in EXPENSE_FIELDS}
         errors, data = validate_expense(values)
-        token = request.form.get("csrf_token", "")
-        if not secrets.compare_digest(token.encode(), session["expense_csrf_token"].encode()):
+        if not valid_expense_csrf():
             errors["form"] = "Your form session expired. Please submit the form again."
         if errors:
             status = 400
         else:
             try:
-                create_expense(**data)
+                if expense is None:
+                    create_expense(**data)
+                elif not update_expense(expense["id"], **data):
+                    abort(404)
             except sqlite3.Error:
                 app.logger.exception("Could not save expense")
                 errors["form"] = "Your expense could not be saved. Please try again shortly."
                 status = 503
             else:
+                if expense is not None:
+                    flash("Expense updated successfully.", "success")
+                    return redirect(url_for("expenses"), code=303)
                 flash("Expense saved successfully.", "success")
                 return redirect(url_for("add_expense"), code=303)
     return render_template(
-        "add_expense.html", values=values, errors=errors,
+        "add_expense.html", values=values, errors=errors, expense=expense,
         categories=EXPENSE_CATEGORIES, text_limits=EXPENSE_TEXT_LIMITS,
     ), status
+
+
+@app.route("/expenses/<int:id>/edit", methods=["GET", "POST"])
+def edit_expense(id):
+    expense = get_expense(id)
+    if expense is None:
+        abort(404)
+    return expense_form(expense)
+
+
+@app.route("/expenses/<int:id>/delete", methods=["POST"])
+def delete_expense(id):
+    if get_expense(id) is None:
+        abort(404)
+    if not valid_expense_csrf():
+        abort(400, description="Your form session expired. Return to Expenses and try again.")
+    try:
+        if not delete_expense_record(id):
+            abort(404)
+    except sqlite3.Error:
+        app.logger.exception("Could not delete expense")
+        return render_template(
+            "expenses.html", expenses=get_expenses(),
+            error="Your expense could not be deleted. Please try again shortly.",
+        ), 503
+    flash("Expense deleted successfully.", "success")
+    return redirect(url_for("expenses"), code=303)
 
 
 # ------------------------------------------------------------------ #
@@ -169,16 +221,6 @@ def logout():
 @app.route("/profile")
 def profile():
     return "Profile page — coming in Step 4"
-
-
-@app.route("/expenses/<int:id>/edit")
-def edit_expense(id):
-    return "Edit expense — coming in Step 8"
-
-
-@app.route("/expenses/<int:id>/delete")
-def delete_expense(id):
-    return "Delete expense — coming in Step 9"
 
 
 if __name__ == "__main__":

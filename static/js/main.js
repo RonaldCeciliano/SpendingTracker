@@ -34,3 +34,44 @@
         trigger.focus();
     });
 })();
+
+(() => {
+    const dialog = document.getElementById('expense-delete-dialog');
+    if (!dialog || typeof dialog.showModal !== 'function') return;
+
+    const cancel = dialog.querySelector('.expense-delete-cancel');
+    const confirm = dialog.querySelector('.expense-delete-confirm');
+    const summary = dialog.querySelector('.expense-delete-summary');
+    let selectedForm = null;
+    let trigger = null;
+
+    document.querySelectorAll('.expense-delete-form').forEach((form) => {
+        const button = form.querySelector('button[type="submit"]');
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (dialog.open) return;
+            selectedForm = form;
+            trigger = button;
+            summary.textContent = form.dataset.expenseSummary;
+            confirm.disabled = false;
+            dialog.showModal();
+            cancel.focus();
+        });
+        button.disabled = false;
+    });
+
+    cancel.addEventListener('click', () => dialog.close());
+    // Closing with Cancel or Escape never submits the selected form.
+    dialog.addEventListener('close', () => {
+        selectedForm = null;
+        if (trigger) trigger.focus();
+        trigger = null;
+    });
+    confirm.addEventListener('click', () => {
+        if (!dialog.open || !selectedForm || confirm.disabled) return;
+        confirm.disabled = true;
+        // Submit the original POST form, including its existing CSRF token.
+        // Bypass the submit listener that opened this confirmation dialog.
+        HTMLFormElement.prototype.submit.call(selectedForm);
+    });
+})();

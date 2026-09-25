@@ -38,9 +38,39 @@ def create_expense(*, date, vendor, amount, category, payment_method=None,
 def get_expenses():
     """Return expense history, newest date first and newest ID for date ties."""
     return get_db().execute(
-        """SELECT date, vendor, amount, category, payment_method, description
+        """SELECT id, date, vendor, amount, category, payment_method, description
            FROM expenses ORDER BY date DESC, id DESC"""
     ).fetchall()
+
+
+def get_expense(expense_id):
+    """Return one expense, or None when its ID does not exist."""
+    if not 0 < expense_id <= 9223372036854775807:
+        return None
+    return get_db().execute(
+        "SELECT * FROM expenses WHERE id = ?", (expense_id,)
+    ).fetchone()
+
+
+def update_expense(expense_id, *, date, vendor, amount, category,
+                   payment_method=None, description=None, notes=None):
+    """Update validated fields in place; return whether a record was found."""
+    db = get_db()
+    with db:
+        cursor = db.execute(
+            """UPDATE expenses SET date = ?, vendor = ?, amount = ?, category = ?,
+               payment_method = ?, description = ?, notes = ? WHERE id = ?""",
+            (date, vendor, amount, category, payment_method, description, notes, expense_id),
+        )
+    return cursor.rowcount == 1
+
+
+def delete_expense(expense_id):
+    """Delete only the selected expense; return whether it existed."""
+    db = get_db()
+    with db:
+        cursor = db.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))
+    return cursor.rowcount == 1
 
 
 def close_db(exception=None):

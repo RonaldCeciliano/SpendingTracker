@@ -538,6 +538,51 @@ a { color: inherit; text-decoration: none; }
 .expense-history-empty h2 { font-family: var(--font-display); }
 .expense-history-empty p { color: var(--ink-muted); margin: 0.75rem 0 1.5rem; }
 
+.expense-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.btn-delete {
+    padding: 0.65rem 1.5rem;
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-sm);
+    background: var(--danger-light);
+    color: var(--danger);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: inherit;
+    cursor: pointer;
+}
+
+.btn-delete:hover { background: var(--danger); color: var(--paper-card); }
+.btn-delete:disabled { opacity: 0.5; cursor: not-allowed; }
+.expense-delete-dialog {
+    width: min(480px, calc(100% - 2rem));
+    max-height: calc(100% - 2rem);
+    overflow-y: auto;
+    margin: auto;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--paper-card);
+    color: var(--ink);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.expense-delete-dialog::backdrop { background: rgba(15, 15, 15, 0.5); }
+.expense-delete-dialog h2 { font-family: var(--font-display); font-size: 1.5rem; }
+.expense-delete-summary { margin: 0.75rem 0; color: var(--ink-muted); overflow-wrap: anywhere; }
+.expense-delete-cancel { font-family: inherit; line-height: inherit; cursor: pointer; }
+.expense-delete-confirm { background: var(--danger); color: var(--paper-card); }
+.expense-delete-dialog button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.expense-cancel { margin-top: 1rem; }
+
 /* ------------------------------------------------------------------ */
 /* Terms page                                                          */
 /* ------------------------------------------------------------------ */
