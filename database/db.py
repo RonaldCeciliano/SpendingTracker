@@ -35,6 +35,14 @@ def create_expense(*, date, vendor, amount, category, payment_method=None,
     return cursor.lastrowid
 
 
+def get_expenses():
+    """Return expense history, newest date first and newest ID for date ties."""
+    return get_db().execute(
+        """SELECT date, vendor, amount, category, payment_method, description
+           FROM expenses ORDER BY date DESC, id DESC"""
+    ).fetchall()
+
+
 def close_db(exception=None):
     """Close the context's connection, including after request failures."""
     db = g.pop("db", None)

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Expenses — Spendly{% endblock %}
+
+{% block content %}
+<section class="expense-history" aria-labelledby="expenses-title">
+    <header class="expense-history-header">
+        <div>
+            <h1 class="auth-title" id="expenses-title">Expenses</h1>
+            <p class="auth-subtitle">Your nail business expenses, newest dates first.</p>
+        </div>
+        <a class="btn-primary" href="{{ url_for('add_expense') }}">Add Expense</a>
+    </header>
+
+    {% if expenses %}
+    <ul class="expense-history-list" aria-label="Expense history">
+        {% for expense in expenses %}
+        <li class="expense-history-card">
+            <dl class="expense-history-details">
+                <div>
+                    <dt>Date</dt>
+                    <dd><time datetime="{{ expense.date }}">{{ expense.date | expense_date }}</time></dd>
+                </div>
+                <div>
+                    <dt>Vendor</dt>
+                    <dd>{{ expense.vendor }}</dd>
+                </div>
+                <div>
+                    <dt>Amount</dt>
+                    <dd class="expense-history-amount">{{ expense.amount | expense_amount }}</dd>
+                </div>
+                <div>
+                    <dt>Category</dt>
+                    <dd>{{ expense.category }}</dd>
+                </div>
+                <div>
+                    <dt>Payment method</dt>
+                    <dd>{{ expense.payment_method or '—' }}</dd>
+                </div>
+                <div>
+                    <dt>Description</dt>
+                    <dd>{{ expense.description or '—' }}</dd>
+                </div>
+            </dl>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="expense-history-empty">
+        <h2>No expenses yet</h2>
+        <p>Add your first business expense to start your expense history.</p>
+        <a class="btn-primary" href="{{ url_for('add_expense') }}">Add your first expense</a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

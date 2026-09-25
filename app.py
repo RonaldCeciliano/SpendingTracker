@@ -7,7 +7,7 @@ from decimal import Decimal
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 
-from database.db import create_expense, init_app
+from database.db import create_expense, get_expenses, init_app
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
@@ -107,6 +107,25 @@ def login():
 # ------------------------------------------------------------------ #
 # Add expense                                                         #
 # ------------------------------------------------------------------ #
+
+@app.template_filter("expense_date")
+def format_expense_date(value):
+    """Display an ISO date without changing its stored representation."""
+    year, month, day = value.split("-")
+    return f"{month}-{day}-{year}"
+
+
+@app.template_filter("expense_amount")
+def format_expense_amount(cents):
+    """Format integer cents exactly, including amounts beyond float precision."""
+    dollars, remainder = divmod(cents, 100)
+    return f"${dollars:,}.{remainder:02d}"
+
+
+@app.route("/expenses")
+def expenses():
+    return render_template("expenses.html", expenses=get_expenses())
+
 
 @app.route("/expenses/add", methods=["GET", "POST"])
 def add_expense():
