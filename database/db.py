@@ -59,6 +59,37 @@ def get_expenses(*, search="", category="", start_date="", end_date=""):
     ).fetchall()
 
 
+def get_spending_summary(reference_date, categories):
+    """Summarize stored cents using one reference date and exact Python integers.
+
+    Category totals/count cover all time. Month/year totals include the entire
+    calendar period, including any future-dated entries in that period. Stream
+    only summary fields so totals cannot overflow SQLite's 64-bit SUM.
+    """
+    year = f"{reference_date.year:04d}"
+    month_totals = [0] * 12
+    category_totals = dict.fromkeys(categories, 0)
+    expense_count = 0
+    for expense in get_db().execute("SELECT date, amount, category FROM expenses"):
+        expense_count += 1
+        category = expense["category"]
+        category_totals[category] = category_totals.get(category, 0) + expense["amount"]
+        if expense["date"][:4] == year:
+            month_totals[int(expense["date"][5:7]) - 1] += expense["amount"]
+    recent_expenses = get_db().execute(
+        """SELECT id, date, vendor, amount, category FROM expenses
+           ORDER BY date DESC, id DESC LIMIT ?""", (5,),
+    ).fetchall()
+    return {
+        "month_total": month_totals[reference_date.month - 1],
+        "year_total": sum(month_totals),
+        "expense_count": expense_count,
+        "category_totals": category_totals,
+        "month_totals": month_totals,
+        "recent_expenses": recent_expenses,
+    }
+
+
 def get_expense(expense_id):
     """Return one expense, or None when its ID does not exist."""
     if not 0 < expense_id <= 9223372036854775807:

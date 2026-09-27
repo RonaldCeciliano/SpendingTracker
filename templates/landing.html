@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Spendly — Track Every Rupee{% endblock %}
+{% block title %}Spendly — Track Every Dollar{% endblock %}
 
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
@@ -12,7 +12,7 @@
     <div class="hero-inner">
         <div class="hero-badge">Free to use · No credit card needed</div>
         <h1 class="hero-title">
-            Track every rupee.<br>
+            Track every dollar.<br>
             <span>Know where it goes.</span>
         </h1>
         <p class="hero-subtitle">
@@ -24,7 +24,7 @@
             <button type="button" class="btn-primary" id="open-demo" aria-haspopup="dialog" aria-controls="demo-modal">See how it works</button>
         </div>
     </div>
-    <div class="hero-dashboard" id="hero-preview" role="img" aria-label="Example expense dashboard: this month ₹18,240, up 12% versus last month; budget left ₹6,760, 43% remaining; 34 transactions this month. Sample spending bars for Food, Travel, and Bills.">
+    <div class="hero-dashboard" id="hero-preview" role="img" aria-label="Example expense dashboard: this month {{ 1824000 | expense_amount }}, up 12% versus last month; budget left {{ 676000 | expense_amount }}, 43% remaining; 34 transactions this month. Sample spending bars for Food, Travel, and Bills.">
         <div class="hero-window-dots" aria-hidden="true">
             <span></span>
             <span></span>
@@ -33,12 +33,12 @@
         <div class="hero-stats" aria-hidden="true">
             <div class="hero-stat">
                 <p class="hero-stat-label">This month</p>
-                <p class="hero-stat-value">₹18,240</p>
+                <p class="hero-stat-value">{{ 1824000 | expense_amount }}</p>
                 <p class="hero-stat-note hero-stat-increase">+12% vs last</p>
             </div>
             <div class="hero-stat">
                 <p class="hero-stat-label">Budget left</p>
-                <p class="hero-stat-value">₹6,760</p>
+                <p class="hero-stat-value">{{ 676000 | expense_amount }}</p>
                 <p class="hero-stat-note hero-stat-remaining">43% remaining</p>
             </div>
             <div class="hero-stat">
@@ -82,7 +82,7 @@
 <section class="features">
     <div class="features-inner">
         <div class="feature-card">
-            <div class="feature-icon">₹</div>
+            <div class="feature-icon">$</div>
             <h3 class="feature-title">Log expenses instantly</h3>
             <p class="feature-body">Add any expense in seconds. Category, amount, date, description — all in one simple form.</p>
         </div>

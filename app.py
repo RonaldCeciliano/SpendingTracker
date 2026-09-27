@@ -1,3 +1,4 @@
+import calendar
 import os
 import re
 import secrets
@@ -10,7 +11,7 @@ from flask import Flask, abort, flash, redirect, render_template, request, send_
 
 from database.db import (
     create_expense, delete_expense as delete_expense_record, get_expense,
-    get_expenses, init_app, update_expense,
+    get_expenses, get_spending_summary, init_app, update_expense,
 )
 
 app = Flask(__name__)
@@ -153,7 +154,12 @@ def view_receipt(id):
 
 @app.route("/")
 def landing():
-    return render_template("landing.html")
+    reference_date = date.today()
+    return render_template(
+        "dashboard.html", reference_date=reference_date,
+        month_names=tuple(calendar.month_name)[1:],
+        summary=get_spending_summary(reference_date, EXPENSE_CATEGORIES),
+    )
 
 
 @app.route("/terms")

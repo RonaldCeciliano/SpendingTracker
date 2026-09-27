@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Spendly{% endblock %}
+
+{% block content %}
+<section class="expense-history dashboard" aria-labelledby="dashboard-title">
+    <header class="expense-history-header">
+        <div>
+            <h1 class="auth-title" id="dashboard-title">Dashboard</h1>
+            <p class="auth-subtitle">A clear view of your business spending.</p>
+        </div>
+        <a class="btn-primary" href="{{ url_for('add_expense') }}">Add Expense</a>
+    </header>
+
+    <dl class="dashboard-cards">
+        <div class="dashboard-panel">
+            <dt>Total spent this month <span>{{ month_names[reference_date.month - 1] }} {{ reference_date.year }}</span></dt>
+            <dd id="month-total">{{ summary.month_total | expense_amount }}</dd>
+        </div>
+        <div class="dashboard-panel">
+            <dt>Total spent this calendar year <span>{{ reference_date.year }}</span></dt>
+            <dd id="year-total">{{ summary.year_total | expense_amount }}</dd>
+        </div>
+        <div class="dashboard-panel">
+            <dt>Total number of expenses <span>All time</span></dt>
+            <dd id="expense-count">{{ summary.expense_count }}</dd>
+        </div>
+    </dl>
+
+    <section class="dashboard-panel dashboard-recent" aria-labelledby="recent-title">
+        <div class="dashboard-section-header">
+            <h2 id="recent-title">Recent expenses</h2>
+            <a class="dashboard-link" href="{{ url_for('expenses') }}">View Expenses</a>
+        </div>
+        {% if summary.recent_expenses %}
+        <ol class="expense-history-list">
+            {% for expense in summary.recent_expenses %}
+            <li class="dashboard-recent-row">
+                <dl class="dashboard-recent-details">
+                    <div><dt>Date</dt><dd><time datetime="{{ expense.date }}">{{ expense.date | expense_date }}</time></dd></div>
+                    <div><dt>Vendor</dt><dd>{{ expense.vendor }}</dd></div>
+                    <div><dt>Amount</dt><dd class="expense-history-amount">{{ expense.amount | expense_amount }}</dd></div>
+                    <div><dt>Category</dt><dd>{{ expense.category }}</dd></div>
+                </dl>
+            </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+        <p class="dashboard-note">No expenses yet. Add your first expense to start tracking your business spending.</p>
+        <a class="dashboard-link" href="{{ url_for('add_expense') }}">Add your first expense</a>
+        {% endif %}
+    </section>
+
+    <div class="dashboard-breakdowns">
+        <section class="dashboard-panel" aria-labelledby="category-title">
+            <h2 id="category-title">Spending by category</h2>
+            {% if not summary.expense_count %}<p class="dashboard-note">No category spending recorded yet.</p>{% endif %}
+            <table class="dashboard-table">
+                <caption>All time · USD</caption>
+                <thead><tr><th scope="col">Category</th><th scope="col">Total</th></tr></thead>
+                <tbody>
+                    {% for category, total in summary.category_totals.items() %}
+                    <tr><th scope="row">{{ category }}</th><td>{{ total | expense_amount }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        <section class="dashboard-panel" aria-labelledby="monthly-title">
+            <h2 id="monthly-title">Monthly spending</h2>
+            {% if not summary.year_total %}<p class="dashboard-note">No spending recorded for {{ reference_date.year }}.</p>{% endif %}
+            <table class="dashboard-table">
+                <caption>{{ reference_date.year }} calendar year · USD</caption>
+                <thead><tr><th scope="col">Month</th><th scope="col">Total</th></tr></thead>
+                <tbody>
+                    {% for total in summary.month_totals %}
+                    <tr><th scope="row">{{ month_names[loop.index0] }}</th><td>{{ total | expense_amount }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+</section>
+{% endblock %}
