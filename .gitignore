@@ -6,3 +6,6 @@ __pycache__/
 .env
 .DS_Store
 .claude/plans/
+
+# Runtime receipt uploads (created automatically).
+instance/receipts/

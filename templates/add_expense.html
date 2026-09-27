@@ -29,7 +29,7 @@
             <div class="auth-error" role="alert">{{ errors.get('form', 'Please correct the highlighted fields below.') }}</div>
             {% endif %}
             <p class="expense-form-help">Date, vendor, amount, and category are required.</p>
-            <form method="post" action="{{ url_for('edit_expense', id=expense.id) if expense else url_for('add_expense') }}" novalidate>
+            <form method="post" enctype="multipart/form-data" action="{{ url_for('edit_expense', id=expense.id) if expense else url_for('add_expense') }}" novalidate>
                 <input type="hidden" name="csrf_token" value="{{ session['expense_csrf_token'] }}">
                 <div class="form-group">
                     <label for="date">Date</label>
@@ -80,6 +80,17 @@
                     <textarea class="form-input" name="notes" id="notes" rows="4"
                         maxlength="{{ text_limits.notes }}" {{ error_attributes('notes') }}>{{ values.notes }}</textarea>
                     {{ field_error('notes') }}
+                </div>
+                <div class="form-group">
+                    <label for="receipt">Receipt (optional)</label>
+                    <input class="form-input" type="file" id="receipt" name="receipt"
+                        accept=".jpg,.jpeg,.png,.pdf" {{ error_attributes('receipt') }}>
+                    <p class="expense-form-help">JPG, JPEG, PNG, or PDF. Maximum 5 MiB. After a failed submission, select the file again.</p>
+                    {{ field_error('receipt') }}
+                    {% if expense and expense.receipt_path %}
+                    <p><a href="{{ url_for('view_receipt', id=expense.id) }}" target="_blank" rel="noopener">View current receipt</a></p>
+                    <label><input type="checkbox" name="remove_receipt" value="1"> Remove receipt when saving changes</label>
+                    {% endif %}
                 </div>
                 <button class="btn-submit" type="submit">{{ 'Save changes' if expense else 'Save expense' }}</button>
                 {% if expense %}

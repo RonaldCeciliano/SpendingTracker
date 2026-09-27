@@ -4,8 +4,9 @@ import secrets
 import sqlite3
 from datetime import date
 from decimal import Decimal
+from pathlib import Path
 
-from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, redirect, render_template, request, send_file, session, url_for
 
 from database.db import (
     create_expense, delete_expense as delete_expense_record, get_expense,
@@ -14,6 +15,11 @@ from database.db import (
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+app.config.update(
+    RECEIPT_UPLOAD_DIR=os.path.join(app.instance_path, "receipts"),
+    MAX_RECEIPT_SIZE=5 * 1024 * 1024,
+    MAX_CONTENT_LENGTH=6 * 1024 * 1024,
+)
 init_app(app)
 
 EXPENSE_CATEGORIES = (
@@ -81,6 +87,65 @@ def validate_expense(values):
         data[field] = data[field] or None
     return errors, data
 
+
+
+RECEIPT_TYPES = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "pdf": "application/pdf"}
+
+
+def receipt_file(identifier):
+    """Accept only generated identifiers, never paths or symlinks."""
+    if not identifier or not re.fullmatch(r"[0-9a-f]{32}\.(jpg|jpeg|png|pdf)", identifier):
+        return None
+    path = Path(app.config["RECEIPT_UPLOAD_DIR"]) / identifier
+    return None if path.is_symlink() else path
+
+
+def remove_receipt(identifier):
+    path = receipt_file(identifier)
+    if path is not None:
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            app.logger.exception("Could not remove stored receipt")
+
+
+def validate_receipt(upload):
+    if upload is None or not upload.filename:
+        return None, None
+    extension = upload.filename.rsplit(".", 1)[-1].lower()
+    if extension not in RECEIPT_TYPES:
+        return "Choose a JPG, JPEG, PNG, or PDF receipt.", None
+    upload.stream.seek(0, 2)
+    size = upload.stream.tell()
+    upload.stream.seek(0)
+    if size > app.config["MAX_RECEIPT_SIZE"]:
+        return "Receipt must be 5 MiB or smaller.", None
+    header = upload.stream.read(8)
+    upload.stream.seek(0)
+    matches = (header.startswith(b"\xff\xd8\xff") if extension in ("jpg", "jpeg") else
+               header == b"\x89PNG\r\n\x1a\n" if extension == "png" else header.startswith(b"%PDF-"))
+    if not matches:
+        return "The receipt contents do not match its JPG, PNG, or PDF file type.", None
+    return None, extension
+
+
+@app.errorhandler(413)
+def upload_too_large(error):
+    return render_template("receipt_error.html"), 413
+
+
+@app.route("/expenses/<int:id>/receipt")
+def view_receipt(id):
+    expense = get_expense(id)
+    path = receipt_file(expense["receipt_path"]) if expense else None
+    if path is None or not path.is_file():
+        abort(404)
+    response = send_file(path, mimetype=RECEIPT_TYPES[path.suffix[1:]],
+                         as_attachment=False, download_name="receipt" + path.suffix, max_age=0)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Content-Security-Policy"] = "sandbox"
+    response.headers["Cache-Control"] = "private, no-store"
+    return response
 
 # ------------------------------------------------------------------ #
 # Routes                                                              #
@@ -179,24 +244,47 @@ def expense_form(expense=None):
         errors, data = validate_expense(values)
         if not valid_expense_csrf():
             errors["form"] = "Your form session expired. Please submit the form again."
+        upload = request.files.get("receipt")
+        receipt_error, extension = validate_receipt(upload)
+        remove = request.form.get("remove_receipt") == "1"
+        if receipt_error:
+            errors["receipt"] = receipt_error
+        if remove and extension:
+            errors["receipt"] = "Choose either a replacement receipt or Remove receipt, then save again."
         if errors:
             status = 400
         else:
+            old_receipt = expense["receipt_path"] if expense else None
+            new_receipt = None
+            saved = False
             try:
+                if extension:
+                    new_receipt = secrets.token_hex(16) + "." + extension
+                    path = receipt_file(new_receipt)
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    with path.open("xb") as destination:
+                        upload.save(destination)
+                data["receipt_path"] = new_receipt or (None if remove else old_receipt)
                 if expense is None:
                     create_expense(**data)
                 elif not update_expense(expense["id"], **data):
                     abort(404)
-            except sqlite3.Error:
+                saved = True
+            except (sqlite3.Error, OSError):
                 app.logger.exception("Could not save expense")
                 errors["form"] = "Your expense could not be saved. Please try again shortly."
                 status = 503
             else:
+                if old_receipt and old_receipt != data["receipt_path"]:
+                    remove_receipt(old_receipt)
                 if expense is not None:
                     flash("Expense updated successfully.", "success")
                     return redirect(url_for("expenses"), code=303)
                 flash("Expense saved successfully.", "success")
                 return redirect(url_for("add_expense"), code=303)
+            finally:
+                if new_receipt and not saved:
+                    remove_receipt(new_receipt)
     return render_template(
         "add_expense.html", values=values, errors=errors, expense=expense,
         categories=EXPENSE_CATEGORIES, text_limits=EXPENSE_TEXT_LIMITS,
@@ -213,7 +301,8 @@ def edit_expense(id):
 
 @app.route("/expenses/<int:id>/delete", methods=["POST"])
 def delete_expense(id):
-    if get_expense(id) is None:
+    expense = get_expense(id)
+    if expense is None:
         abort(404)
     if not valid_expense_csrf():
         abort(400, description="Your form session expired. Return to Expenses and try again.")
@@ -227,6 +316,7 @@ def delete_expense(id):
             categories=EXPENSE_CATEGORIES,
             error="Your expense could not be deleted. Please try again shortly.",
         ), 503
+    remove_receipt(expense["receipt_path"])
     flash("Expense deleted successfully.", "success")
     return redirect(url_for("expenses"), code=303)
 

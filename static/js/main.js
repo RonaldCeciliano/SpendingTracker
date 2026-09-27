@@ -75,3 +75,73 @@
         HTMLFormElement.prototype.submit.call(selectedForm);
     });
 })();
+
+(() => {
+    const dialog = document.getElementById('expense-receipt-dialog');
+    if (!dialog || typeof dialog.showModal !== 'function') return;
+
+    const close = dialog.querySelector('.expense-receipt-close');
+    const content = dialog.querySelector('.expense-receipt-content');
+    const title = document.getElementById('expense-receipt-title');
+    let trigger = null;
+    let previousOverflow;
+    let controller = null;
+    const rendererUrl = new URL('receipt_pdf.mjs', document.currentScript.src).href;
+
+    function showError(preview) {
+        if (!content.contains(preview)) return;
+        const error = document.createElement('p');
+        error.textContent = 'This receipt could not be displayed. It may be missing, damaged, or password-protected.';
+        error.setAttribute('role', 'status');
+        content.replaceChildren(error);
+    }
+
+    document.querySelectorAll('.expense-receipt-open').forEach((button) => {
+        button.addEventListener('click', async () => {
+            if (dialog.open) return;
+            trigger = button;
+            controller = new AbortController();
+            const signal = controller.signal;
+            const label = button.dataset.receiptLabel;
+            const isPdf = button.dataset.receiptType === 'pdf';
+            const preview = document.createElement(isPdf ? 'div' : 'img');
+            if (isPdf) {
+                preview.textContent = 'Loading receipt…';
+            } else {
+                preview.className = 'expense-receipt-image';
+                preview.alt = label;
+                preview.addEventListener('error', () => showError(preview));
+                preview.src = button.dataset.receiptUrl;
+            }
+            title.textContent = label;
+            content.replaceChildren(preview);
+            previousOverflow = document.body.style.overflow;
+            dialog.showModal();
+            document.body.style.overflow = 'hidden';
+            close.focus();
+            if (isPdf) {
+                try {
+                    const {renderReceiptPdf} = await import(rendererUrl);
+                    if (!signal.aborted) {
+                        await renderReceiptPdf({url: button.dataset.receiptUrl,
+                            container: preview, label, signal});
+                    }
+                } catch {
+                    if (!signal.aborted) showError(preview);
+                }
+            }
+        });
+        button.disabled = false;
+    });
+
+    close.addEventListener('click', () => dialog.close());
+    // Native Escape dismissal fires the same close event as the Close button.
+    dialog.addEventListener('close', () => {
+        if (controller) controller.abort();
+        controller = null;
+        content.replaceChildren();
+        document.body.style.overflow = previousOverflow;
+        if (trigger) trigger.focus();
+        trigger = null;
+    });
+})();

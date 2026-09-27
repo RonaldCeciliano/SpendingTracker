@@ -16,7 +16,8 @@ class FormParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
-        if tag == "input":
+        if tag == "input" and attrs.get("type") != "file" and not (
+                attrs.get("type") == "checkbox" and "checked" not in attrs):
             self.values[attrs.get("name")] = attrs.get("value", "")
         elif tag == "option" and "selected" in attrs:
             self.values["category"] = attrs["value"]

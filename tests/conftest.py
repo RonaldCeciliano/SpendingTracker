@@ -8,6 +8,7 @@ def app(tmp_path, monkeypatch):
     monkeypatch.setitem(flask_app.config, "TESTING", True)
     monkeypatch.setitem(flask_app.config, "DATABASE", str(tmp_path / "expenses.db"))
     monkeypatch.setitem(flask_app.config, "SECRET_KEY", "test-secret")
+    monkeypatch.setitem(flask_app.config, "RECEIPT_UPLOAD_DIR", str(tmp_path / "receipts"))
     with flask_app.app_context():
         init_db()
     return flask_app

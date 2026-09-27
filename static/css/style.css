@@ -710,3 +710,40 @@ a { color: inherit; text-decoration: none; }
     .terms-page { padding: 3rem 1rem 2rem; }
     .terms-section { padding: 1.5rem; }
 }
+
+/* Receipt preview uses the same dialog surface as expense confirmation. */
+.expense-receipt-dialog {
+    width: min(960px, calc(100% - 2rem));
+    max-height: calc(100dvh - 2rem);
+}
+
+.expense-receipt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.expense-receipt-header h2 { min-width: 0; overflow-wrap: anywhere; }
+.expense-receipt-close { flex-shrink: 0; }
+.expense-receipt-open, .expense-receipt-close { font: inherit; cursor: pointer; }
+.expense-receipt-open:disabled { opacity: 0.5; cursor: not-allowed; }
+.expense-receipt-content { min-width: 0; overflow: auto; max-height: 75dvh; }
+.expense-receipt-image {
+    display: block;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    margin: auto;
+    object-fit: contain;
+}
+
+.expense-receipt-pdf-page {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 auto 1rem;
+}
+
+.expense-receipt-pdf-page:last-child { margin-bottom: 0; }
