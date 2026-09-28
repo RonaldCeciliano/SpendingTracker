@@ -1,0 +1,3 @@
+-r requirements.txt
+# PDF text extraction and visual rendering for report verification.
+pypdfium2==5.13.0

@@ -14,6 +14,8 @@ from database.db import (
     get_expenses, get_spending_summary, init_app, update_expense,
 )
 
+from expense_report import build_expense_report
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 app.config.update(
@@ -200,8 +202,31 @@ def format_expense_amount(cents):
     return f"${dollars:,}.{remainder:02d}"
 
 
+def expense_pdf(records, filters):
+    generated_date = date.today()
+    output = build_expense_report(records, filters, generated_date,
+                                  format_expense_date, format_expense_amount)
+    response = send_file(
+        output, mimetype="application/pdf", as_attachment=True,
+        download_name=f"spendly-expense-report-{generated_date.isoformat()}.pdf",
+    )
+    response.headers["Cache-Control"] = "private, no-store"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
 @app.route("/expenses")
 def expenses():
+    return expense_history()
+
+
+@app.route("/expenses/export")
+def export_expenses():
+    return expense_history(export=True)
+
+
+def expense_history(*, export=False):
+    """Share filter validation and the database query for history and PDF."""
     session.setdefault("expense_csrf_token", secrets.token_hex(32))
     filters = {field: request.args.get(field, "")
                for field in ("search", "category", "start_date", "end_date")}
@@ -217,8 +242,14 @@ def expenses():
                 errors[field] = "Select a valid date."
     if not errors and data["start_date"] and data["end_date"] and data["start_date"] > data["end_date"]:
         errors["end_date"] = "End Date must be on or after Start Date."
+    records = [] if errors else get_expenses(**data)
+    if export and not errors:
+        if records:
+            return expense_pdf(records, data)
+        flash("No expenses to export. Add an expense or adjust your filters.", "info")
+        return redirect(url_for("expenses", **filters), code=303)
     return render_template(
-        "expenses.html", expenses=[] if errors else get_expenses(**data),
+        "expenses.html", expenses=records,
         filters=filters, filter_errors=errors, active_filters=any(data.values()),
         categories=EXPENSE_CATEGORIES,
     ), 400 if errors else 200

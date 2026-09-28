@@ -12,7 +12,7 @@
         <a class="btn-primary" href="{{ url_for('add_expense') }}">Add Expense</a>
     </header>
 
-    {% for message in get_flashed_messages(category_filter=['success']) %}
+    {% for message in get_flashed_messages(category_filter=['success', 'info']) %}
     <div class="expense-success" role="status">{{ message }}</div>
     {% endfor %}
     {% if error %}
@@ -59,6 +59,14 @@
             <a class="btn-ghost" href="{{ url_for('expenses') }}">Clear Filters</a>
         </div>
     </form>
+
+    {% if not filter_errors %}
+    <div class="expense-export-actions">
+        <a class="btn-ghost" href="{{ url_for('export_expenses', **filters) }}"
+            aria-describedby="expense-export-scope">Export PDF</a>
+        <p id="expense-export-scope">{{ 'Exports expenses matching the current filters.' if active_filters else 'Exports all expenses.' }}</p>
+    </div>
+    {% endif %}
 
     {% if filter_errors %}
     <div class="auth-error" role="alert">Correct the filters above and apply them again.</div>

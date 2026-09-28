@@ -54,7 +54,7 @@ def get_expenses(*, search="", category="", start_date="", end_date=""):
         parameters.append(end_date)
     where = " WHERE " + " AND ".join(conditions) if conditions else ""
     return get_db().execute(
-        """SELECT id, date, vendor, amount, category, payment_method, description, receipt_path
+        """SELECT id, date, vendor, amount, category, payment_method, description, notes, receipt_path
            FROM expenses""" + where + " ORDER BY date DESC, id DESC", parameters,
     ).fetchall()
 
