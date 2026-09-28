@@ -64,7 +64,10 @@
     <div class="expense-export-actions">
         <a class="btn-ghost" href="{{ url_for('export_expenses', **filters) }}"
             aria-describedby="expense-export-scope">Export PDF</a>
+        <a class="btn-ghost" href="{{ url_for('export_records', **filters) }}"
+            aria-describedby="expense-export-scope expense-package-scope">Export Records Package</a>
         <p id="expense-export-scope">{{ 'Exports expenses matching the current filters.' if active_filters else 'Exports all expenses.' }}</p>
+        <p id="expense-package-scope">Records package includes the PDF report and available receipts.</p>
     </div>
     {% endif %}
 

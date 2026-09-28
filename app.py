@@ -15,6 +15,7 @@ from database.db import (
 )
 
 from expense_report import build_expense_report
+from expense_records import build_records_package
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
@@ -202,13 +203,18 @@ def format_expense_amount(cents):
     return f"${dollars:,}.{remainder:02d}"
 
 
-def expense_pdf(records, filters):
+def expense_export(records, filters, *, package=False):
+    """Build the shared report and optionally bundle its available receipts."""
     generated_date = date.today()
     output = build_expense_report(records, filters, generated_date,
                                   format_expense_date, format_expense_amount)
+    if package:
+        output = build_records_package(records, output, receipt_file)
+    name = "records" if package else "report"
+    extension = "zip" if package else "pdf"
     response = send_file(
-        output, mimetype="application/pdf", as_attachment=True,
-        download_name=f"spendly-expense-report-{generated_date.isoformat()}.pdf",
+        output, mimetype="application/zip" if package else "application/pdf", as_attachment=True,
+        download_name=f"spendly-expense-{name}-{generated_date.isoformat()}.{extension}",
     )
     response.headers["Cache-Control"] = "private, no-store"
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -222,11 +228,16 @@ def expenses():
 
 @app.route("/expenses/export")
 def export_expenses():
-    return expense_history(export=True)
+    return expense_history(export="pdf")
 
 
-def expense_history(*, export=False):
-    """Share filter validation and the database query for history and PDF."""
+@app.route("/expenses/export-records")
+def export_records():
+    return expense_history(export="records")
+
+
+def expense_history(*, export=None):
+    """Share filter validation and the database query for history and exports."""
     session.setdefault("expense_csrf_token", secrets.token_hex(32))
     filters = {field: request.args.get(field, "")
                for field in ("search", "category", "start_date", "end_date")}
@@ -245,7 +256,7 @@ def expense_history(*, export=False):
     records = [] if errors else get_expenses(**data)
     if export and not errors:
         if records:
-            return expense_pdf(records, data)
+            return expense_export(records, data, package=export == "records")
         flash("No expenses to export. Add an expense or adjust your filters.", "info")
         return redirect(url_for("expenses", **filters), code=303)
     return render_template(
