@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ 'Edit Expense' if expense else 'Add Expense' }} — Spendly{% endblock %}
+{% block title %}{{ 'Edit Expense' if expense else 'Add Expense' }} — ExpenseHQ{% endblock %}
 
 {% macro field_error(field) %}
     {% if errors.get(field) %}

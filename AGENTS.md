@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-Spendly is a Flask expense-tracker starter application. `app.py` defines routes and starts the development server. `templates/` contains Jinja2 pages; extend `base.html` for shared navigation, footer, and asset links. Keep styles in `static/css/style.css` and browser behavior in `static/js/main.js`.
+ExpenseHQ is a Flask expense-tracker starter application. `app.py` defines routes and starts the development server. `templates/` contains Jinja2 pages; extend `base.html` for shared navigation, footer, and asset links. Keep styles in `static/css/style.css` and browser behavior in `static/js/main.js`.
 
 `database/db.py` is a placeholder for SQLite connection, schema initialization, and seed helpers; `database/__init__.py` marks the package. Authentication forms currently only render, and profile, logout, and expense routes are placeholders. No tests directory exists yet; add tests under `tests/` as behavior is implemented.
 

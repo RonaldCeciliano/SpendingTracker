@@ -42,7 +42,7 @@ def test_all_headers_order_download_and_read_only(client, app, history, monkeypa
     before = [dict(row) for row in expense_rows(app)]
     response = client.get('/expenses/export')
     text = pdf_text(response)
-    assert 'Spendly' in text and 'Expense Report' in text
+    assert 'ExpenseHQ' in text and 'Expense Report' in text
     assert 'Generated: 01-02-2027' in text
     assert 'Expenses included: 4' in text
     assert 'Total amount spent: $297.52' in text
@@ -51,7 +51,7 @@ def test_all_headers_order_download_and_read_only(client, app, history, monkeypa
     positions = [header_text.index(label, header_text.index('Scope:')) for label in HEADERS]
     assert positions == sorted(positions)
     assert text.index('09-30-2026') < text.index('Local Supply') < text.index('Tool Shop') < text.index('09-01-2026')
-    assert response.headers['Content-Disposition'] == 'attachment; filename=spendly-expense-report-2027-01-02.pdf'
+    assert response.headers['Content-Disposition'] == 'attachment; filename=expensehq-expense-report-2027-01-02.pdf'
     assert response.headers['Cache-Control'] == 'private, no-store'
     assert response.headers['X-Content-Type-Options'] == 'nosniff'
     assert [dict(row) for row in expense_rows(app)] == before

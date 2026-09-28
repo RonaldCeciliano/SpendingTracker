@@ -6,7 +6,7 @@ import unicodedata
 from zipfile import ZipFile, ZIP_STORED
 
 
-ROOT = "Spendly Expense Records"
+ROOT = "ExpenseHQ Expense Records"
 
 
 def receipt_export_stem(expense):
@@ -29,7 +29,7 @@ def build_records_package(records, report, receipt_file):
     used_names = set()
     issues = []
     with ZipFile(output, "w", compression=ZIP_STORED) as archive:
-        archive.writestr(f"{ROOT}/Spendly Expense Report.pdf", report.getvalue())
+        archive.writestr(f"{ROOT}/ExpenseHQ Expense Report.pdf", report.getvalue())
         for expense in records:
             if not expense["receipt_path"]:
                 continue

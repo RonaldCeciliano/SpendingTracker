@@ -60,7 +60,7 @@ def test_page_and_navigation(client, app):
     response = client.get("/expenses/add")
     assert response.status_code == 200
     html = response.get_data(as_text=True)
-    assert "Add Expense — Spendly" in html
+    assert "Add Expense — ExpenseHQ" in html
     assert '<label for="date">Date</label>' in html
     assert 'type="date" name="date"' in html
     assert "MM-DD-YYYY" not in html

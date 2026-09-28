@@ -214,7 +214,7 @@ def expense_export(records, filters, *, package=False):
     extension = "zip" if package else "pdf"
     response = send_file(
         output, mimetype="application/zip" if package else "application/pdf", as_attachment=True,
-        download_name=f"spendly-expense-{name}-{generated_date.isoformat()}.{extension}",
+        download_name=f"expensehq-expense-{name}-{generated_date.isoformat()}.{extension}",
     )
     response.headers["Cache-Control"] = "private, no-store"
     response.headers["X-Content-Type-Options"] = "nosniff"

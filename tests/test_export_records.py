@@ -19,7 +19,7 @@ from test_view_expenses import save_expense
 
 
 ROUTE = '/expenses/export-records'
-REPORT = f'{ROOT}/Spendly Expense Report.pdf'
+REPORT = f'{ROOT}/ExpenseHQ Expense Report.pdf'
 ISSUES = f'{ROOT}/Receipt Export Issues.txt'
 
 
@@ -69,7 +69,7 @@ def test_response_formats_bytes_and_read_only(client, app, monkeypatch):
     save_expense(app, vendor='No receipt', notes='Keep this note in the report')
     before = [dict(row) for row in expense_rows(app)]
     response, archive = package(client)
-    assert response.headers['Content-Disposition'] == 'attachment; filename=spendly-expense-records-2027-01-02.zip'
+    assert response.headers['Content-Disposition'] == 'attachment; filename=expensehq-expense-records-2027-01-02.zip'
     assert response.headers['Cache-Control'] == 'private, no-store'
     assert response.headers['X-Content-Type-Options'] == 'nosniff'
     assert len(archive.namelist()) == 5

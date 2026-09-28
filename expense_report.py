@@ -12,10 +12,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import LongTable, Paragraph, SimpleDocTemplate, Spacer, TableStyle
 
 
-# Reuse the licensed fonts already distributed with Spendly's receipt viewer.
+# Reuse the licensed fonts already distributed with ExpenseHQ's receipt viewer.
 FONT_DIR = Path(__file__).parent / 'static/vendor/pdfjs/standard_fonts'
-for name, filename in [('Spendly', 'LiberationSans-Regular.ttf'),
-                       ('SpendlyBold', 'LiberationSans-Bold.ttf')]:
+for name, filename in [('ExpenseHQ', 'LiberationSans-Regular.ttf'),
+                       ('ExpenseHQBold', 'LiberationSans-Bold.ttf')]:
     pdfmetrics.registerFont(TTFont(name, str(FONT_DIR / filename)))
 
 HEADERS = ('Date', 'Vendor', 'Amount', 'Category', 'Payment Method', 'Description', 'Receipt')
@@ -25,9 +25,9 @@ def build_expense_report(records, filters, generated_date, format_date, format_a
     """Return a PDF buffer; all money arithmetic uses integer cents."""
     output = BytesIO()
     ink = colors.HexColor('#25352f')
-    body = ParagraphStyle('body', fontName='Spendly', fontSize=9, leading=12,
+    body = ParagraphStyle('body', fontName='ExpenseHQ', fontSize=9, leading=12,
                           textColor=ink, splitLongWords=True)
-    bold = ParagraphStyle('bold', parent=body, fontName='SpendlyBold')
+    bold = ParagraphStyle('bold', parent=body, fontName='ExpenseHQBold')
     amount_style = ParagraphStyle('amount', parent=body, alignment=TA_RIGHT)
     amount_heading = ParagraphStyle('amount-heading', parent=bold, alignment=TA_RIGHT)
     receipt_style = ParagraphStyle('receipt', parent=body, alignment=TA_CENTER)
@@ -38,7 +38,7 @@ def build_expense_report(records, filters, generated_date, format_date, format_a
     note_heading = ParagraphStyle('note-heading', parent=bold, spaceBefore=10,
                                   spaceAfter=4, keepWithNext=True)
     unsupported = set()
-    supported = pdfmetrics.getFont('Spendly').face.charToGlyph
+    supported = pdfmetrics.getFont('ExpenseHQ').face.charToGlyph
 
     def paragraph(value, style=body):
         text = str(value or '').replace('\r\n', '\n').replace('\r', '\n').replace('\t', '    ')
@@ -52,7 +52,7 @@ def build_expense_report(records, filters, generated_date, format_date, format_a
                 parts.append(f'[U+{ord(char):04X}]')
         return Paragraph(escape(''.join(parts)).replace('\n', '<br/>'), style)
 
-    story = [paragraph('Spendly', bold), paragraph('Expense Report', heading),
+    story = [paragraph('ExpenseHQ', bold), paragraph('Expense Report', heading),
              paragraph(f'Generated: {format_date(generated_date.isoformat())}'), Spacer(1, 10)]
     summary = [paragraph(f'Expenses included: {len(records)}', bold),
                paragraph(f'Total amount spent: {format_amount(sum(row["amount"] for row in records))}', bold)]
@@ -115,15 +115,15 @@ def build_expense_report(records, filters, generated_date, format_date, format_a
         canvas.saveState()
         canvas.setStrokeColor(colors.HexColor('#dce3de'))
         canvas.line(36, 31, 756, 31)
-        canvas.setFont('Spendly', 8)
+        canvas.setFont('ExpenseHQ', 8)
         canvas.setFillColor(ink)
-        canvas.drawString(36, 19, 'Spendly · Expense Report')
+        canvas.drawString(36, 19, 'ExpenseHQ · Expense Report')
         canvas.drawRightString(756, 19, f'Page {document.page}')
         canvas.restoreState()
 
     document = SimpleDocTemplate(output, pagesize=landscape(letter),
                                  leftMargin=36, rightMargin=36, topMargin=36, bottomMargin=42,
-                                 title='Spendly Expense Report', author='Spendly')
+                                 title='ExpenseHQ Expense Report', author='ExpenseHQ')
     # Frame padding is included inside the margins; reserve it in the table width.
     document.leftMargin = 30
     document.rightMargin = 30

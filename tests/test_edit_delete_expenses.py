@@ -29,7 +29,7 @@ def test_edit_prepopulates_all_fields(client, app, existing, edit_form):
     }
     assert len(expense_rows(app)) == 1
     html = client.get(f"/expenses/{existing}/edit").get_data(as_text=True)
-    assert "Edit Expense — Spendly" in html
+    assert "Edit Expense — ExpenseHQ" in html
     assert 'type="date" name="date"' in html
     assert 'href="/expenses"' in html
 

@@ -48,7 +48,7 @@ def test_pages_and_empty_states_use_us_currency(client, path):
 
 def test_dashboard_totals_use_usd(client):
     html = client.get("/").text
-    assert "Dashboard — Spendly" in html
+    assert "Dashboard — ExpenseHQ" in html
     assert 'id="month-total">$0.00' in html
     assert 'id="year-total">$0.00' in html
     assert "$18,240.00" not in html

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Spendly — Track Every Dollar{% endblock %}
+{% block title %}ExpenseHQ — Track Every Dollar{% endblock %}
 
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
@@ -8,7 +8,7 @@
 
 {% block content %}
 
-<section class="hero spendly-hero">
+<section class="hero expensehq-hero">
     <div class="hero-inner">
         <div class="hero-badge">Free to use · No credit card needed</div>
         <h1 class="hero-title">
@@ -16,7 +16,7 @@
             <span>Know where it goes.</span>
         </h1>
         <p class="hero-subtitle">
-            Spendly helps you log expenses, spot patterns, and stay<br class="hero-desktop-break">
+            ExpenseHQ helps you log expenses, spot patterns, and stay<br class="hero-desktop-break">
             on budget — without the spreadsheet headache.
         </p>
         <div class="hero-actions">
@@ -66,14 +66,14 @@
 
 <dialog class="demo-modal" id="demo-modal" aria-labelledby="demo-title">
     <div class="demo-modal-header">
-        <h2 id="demo-title">See how Spendly works</h2>
+        <h2 id="demo-title">See how ExpenseHQ works</h2>
         <button type="button" class="demo-modal-close" aria-label="Close video" autofocus>&times;</button>
     </div>
     <div class="demo-modal-video"></div>
     <template id="demo-video-template">
         <!-- Replace this placeholder with your YouTube /embed/VIDEO_ID URL. -->
         <iframe src="https://www.youtube.com/embed/aqz-KE-bpKQ"
-            title="Spendly demo video (placeholder)"
+            title="ExpenseHQ demo video (placeholder)"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </template>
@@ -102,7 +102,7 @@
 <section class="cta-section">
     <div class="cta-inner">
         <h2 class="cta-title">Ready to take control?</h2>
-        <p class="cta-body">Join thousands of people who track their expenses with Spendly.</p>
+        <p class="cta-body">Join thousands of people who track their expenses with ExpenseHQ.</p>
         <a href="{{ url_for('register') }}" class="btn-primary">Create free account</a>
     </div>
 </section>
